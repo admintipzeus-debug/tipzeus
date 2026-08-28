@@ -36,6 +36,7 @@ const EMPTY_TIP = {
   pick: "",
   odds: "",
   why: "",
+  imageUrl: "",
 };
 
 function Field({ label, children }) {
@@ -116,6 +117,15 @@ function TipForm({ initial, onSave, onCancel }) {
 
       <Field label="Venue">
         <input style={inputStyle} value={form.venue} onChange={update("venue")} placeholder="Redcliffe Park" />
+      </Field>
+
+      <Field label="Image URL (optional)">
+        <input
+          style={inputStyle}
+          value={form.imageUrl}
+          onChange={update("imageUrl")}
+          placeholder="https://example.com/match-photo.jpg"
+        />
       </Field>
 
       <div style={{ display: "flex", gap: 10 }}>

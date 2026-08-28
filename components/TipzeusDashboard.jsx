@@ -116,6 +116,7 @@ function ThumbIcon({ filled }) {
 function TipCard({ tip }) {
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(tip.likes);
+  const [imageFailed, setImageFailed] = useState(false);
 
   const toggleLike = () => {
     setLiked((prev) => !prev);
@@ -195,6 +196,25 @@ function TipCard({ tip }) {
           <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 1 }}>{tip.venue}</div>
         </div>
       </div>
+
+      {tip.imageUrl && !imageFailed && (
+        <div
+          style={{
+            marginBottom: 12,
+            borderRadius: 14,
+            overflow: "hidden",
+            border: `1px solid ${COLORS.line}`,
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={tip.imageUrl}
+            alt={`${tip.home} vs ${tip.away}`}
+            onError={() => setImageFailed(true)}
+            style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }}
+          />
+        </div>
+      )}
 
       <div
         style={{
@@ -286,14 +306,31 @@ function TipCard({ tip }) {
   );
 }
 
+function formatTime(date) {
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "pm" : "am";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes}${ampm}`;
+}
+
 export default function TipzeusDashboard() {
   const [tips, setTips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updatedAt, setUpdatedAt] = useState(null);
 
   useEffect(() => {
     fetch("/api/tips")
       .then((res) => res.json())
-      .then((data) => setTips(data.filter((tip) => tip.published)))
+      .then((data) => {
+        const published = data.filter((tip) => tip.published);
+        setTips(published);
+        const latest = published.reduce(
+          (max, tip) => (!max || new Date(tip.updatedAt) > max ? new Date(tip.updatedAt) : max),
+          null
+        );
+        setUpdatedAt(latest);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -356,7 +393,9 @@ export default function TipzeusDashboard() {
         <h1 style={{ fontFamily: FONT_HEAD, fontWeight: 800, fontSize: 24, margin: "0 0 4px", letterSpacing: "-0.01em" }}>
           Today's tips
         </h1>
-        <p style={{ margin: 0, color: COLORS.muted, fontSize: 13.5 }}>Premier League — updated 9:40am</p>
+        <p style={{ margin: 0, color: COLORS.muted, fontSize: 13.5 }}>
+          Premier League{updatedAt ? ` — updated ${formatTime(updatedAt)}` : ""}
+        </p>
       </div>
 
       <div style={{ display: "flex", gap: 10, padding: "12px 20px 4px" }}>
@@ -403,21 +442,6 @@ export default function TipzeusDashboard() {
       {tips.map((tip) => (
         <TipCard key={tip.id} tip={tip} />
       ))}
-
-      <div
-        style={{
-          margin: "24px 20px 0",
-          padding: "14px 15px",
-          borderRadius: 14,
-          background: COLORS.card,
-          border: `1px solid ${COLORS.line}`,
-          fontSize: 11.5,
-          color: COLORS.muted,
-          lineHeight: 1.5,
-        }}
-      >
-        This is a design mockup. Team names, odds, unit sizes, and like counts are placeholders — not real tips or wagering data.
-      </div>
     </div>
   );
 }
