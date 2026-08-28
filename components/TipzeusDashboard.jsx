@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 const FONT_HEAD = "'Baloo 2', sans-serif";
 const FONT_BODY = "'Inter', sans-serif";
@@ -22,53 +23,25 @@ const COLORS = {
   skySoft: "#DCF0FF",
 };
 
-function FootballScene() {
+function Banner() {
   return (
     <div
       style={{
         margin: "16px 20px 4px",
         borderRadius: 20,
         overflow: "hidden",
-        height: 150,
         position: "relative",
         boxShadow: "0 8px 20px -8px rgba(46,36,22,0.25)",
       }}
     >
-      <svg viewBox="0 0 400 172" preserveAspectRatio="xMidYMid slice" style={{ width: "100%", height: "100%", display: "block" }}>
-        <defs>
-          <linearGradient id="skyF" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#4FD0E9" />
-            <stop offset="1" stopColor="#3FC1E0" />
-          </linearGradient>
-        </defs>
-        <rect width="400" height="172" fill="url(#skyF)" />
-        <circle cx="345" cy="30" r="24" fill="#FFDD55" />
-        <circle cx="345" cy="30" r="32" fill="#FFDD55" opacity="0.35" />
-        <ellipse cx="60" cy="26" rx="26" ry="12" fill="#ffffff" opacity="0.85" />
-        <ellipse cx="90" cy="20" rx="18" ry="9" fill="#ffffff" opacity="0.85" />
-        <rect x="0" y="58" width="400" height="18" fill="#2B2456" />
-        <rect x="0" y="76" width="400" height="96" fill="#3CB24B" />
-        <rect x="0" y="76" width="400" height="16" fill="#37A644" />
-        <rect x="0" y="108" width="400" height="16" fill="#37A644" />
-        <rect x="0" y="140" width="400" height="16" fill="#37A644" />
-        <circle cx="230" cy="130" r="26" fill="none" stroke="#ffffff" strokeOpacity="0.55" strokeWidth="2" />
-        <rect x="-20" y="105" width="60" height="50" fill="none" stroke="#ffffff" strokeOpacity="0.55" strokeWidth="2" />
-        <circle cx="205" cy="150" r="8" fill="#ffffff" />
-      </svg>
-      <div
-        style={{
-          position: "absolute",
-          left: 14,
-          bottom: 12,
-          color: "#fff",
-          fontFamily: FONT_HEAD,
-          fontWeight: 800,
-          fontSize: 15,
-          textShadow: "0 2px 8px rgba(0,0,0,0.3)",
-        }}
-      >
-        Kickoff under the lights ⚽
-      </div>
+      <Image
+        src="/tipzeus_banner.png"
+        alt="Tipzeus — accurate tips, bet with confidence, win like a champion"
+        width={1717}
+        height={916}
+        style={{ width: "100%", height: "auto", display: "block" }}
+        priority
+      />
     </div>
   );
 }
@@ -441,7 +414,7 @@ export default function TipzeusDashboard() {
         </div>
       </div>
 
-      <FootballScene />
+      <Banner />
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 20px 12px" }}>
         <h2 style={{ fontFamily: FONT_HEAD, fontSize: 16, fontWeight: 700, margin: 0 }}>Today's fixtures</h2>
