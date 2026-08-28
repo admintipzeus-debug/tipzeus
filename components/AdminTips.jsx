@@ -37,6 +37,7 @@ const EMPTY_TIP = {
   odds: "",
   why: "",
   imageUrl: "",
+  likes: 0,
 };
 
 function Field({ label, children }) {
@@ -76,6 +77,7 @@ function TipForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial);
 
   const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+  const updateLikes = (e) => setForm({ ...form, likes: e.target.value === "" ? 0 : Math.max(0, parseInt(e.target.value, 10) || 0) });
 
   const canSave = form.home.trim() && form.away.trim() && form.pick.trim() && form.odds.trim();
 
@@ -158,6 +160,11 @@ function TipForm({ initial, onSave, onCancel }) {
         <div style={{ flex: 1 }}>
           <Field label="Odds">
             <input style={inputStyle} value={form.odds} onChange={update("odds")} placeholder="11/10" />
+          </Field>
+        </div>
+        <div style={{ flex: 1 }}>
+          <Field label="Likes">
+            <input style={inputStyle} type="number" min={0} value={form.likes} onChange={updateLikes} placeholder="0" />
           </Field>
         </div>
       </div>

@@ -9,8 +9,10 @@ function isAuthorized(request) {
 }
 
 export function middleware(request) {
-  const isAdminPage = request.nextUrl.pathname.startsWith("/admin");
-  const isMutatingApi = request.nextUrl.pathname.startsWith("/api/tips") && request.method !== "GET";
+  const { pathname } = request.nextUrl;
+  const isAdminPage = pathname.startsWith("/admin");
+  const isLikeAction = /^\/api\/tips\/[^/]+\/like$/.test(pathname) && request.method === "POST";
+  const isMutatingApi = pathname.startsWith("/api/tips") && request.method !== "GET" && !isLikeAction;
 
   if (!isAdminPage && !isMutatingApi) {
     return NextResponse.next();

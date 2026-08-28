@@ -113,14 +113,46 @@ function ThumbIcon({ filled }) {
   );
 }
 
+const LIKED_STORAGE_KEY = "tipzeus_liked_tip_ids";
+
+function getLikedIds() {
+  try {
+    return JSON.parse(localStorage.getItem(LIKED_STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveLikedIds(ids) {
+  try {
+    localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    // ignore storage failures (private browsing, disabled storage, etc.)
+  }
+}
+
 function TipCard({ tip }) {
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(tip.likes);
   const [imageFailed, setImageFailed] = useState(false);
 
+  useEffect(() => {
+    setLiked(getLikedIds().includes(tip.id));
+  }, [tip.id]);
+
   const toggleLike = () => {
-    setLiked((prev) => !prev);
-    setLikes((prev) => (liked ? prev - 1 : prev + 1));
+    const newLiked = !liked;
+    setLiked(newLiked);
+    setLikes((prev) => (newLiked ? prev + 1 : prev - 1));
+
+    const ids = getLikedIds();
+    saveLikedIds(newLiked ? [...new Set([...ids, tip.id])] : ids.filter((id) => id !== tip.id));
+
+    fetch(`/api/tips/${tip.id}/like`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ liked: newLiked }),
+    }).catch(() => {});
   };
 
   const confBg = tip.confidence === "high" ? COLORS.tealSoft : COLORS.sunSoft;
