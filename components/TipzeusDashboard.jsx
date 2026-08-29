@@ -323,6 +323,7 @@ export default function TipzeusDashboard() {
   const [tips, setTips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatedAt, setUpdatedAt] = useState(null);
+  const [hitRate, setHitRate] = useState("");
 
   useEffect(() => {
     fetch("/api/tips")
@@ -337,6 +338,11 @@ export default function TipzeusDashboard() {
         setUpdatedAt(latest);
       })
       .finally(() => setLoading(false));
+
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => setHitRate(data.hitRate))
+      .catch(() => {});
   }, []);
 
   return (
@@ -411,7 +417,7 @@ export default function TipzeusDashboard() {
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.82)", marginTop: 2 }}>Tips today</div>
         </div>
         <div style={{ flex: 1, background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: "12px 14px" }}>
-          <div style={{ fontFamily: FONT_HEAD, fontWeight: 800, fontSize: 20 }}>68%</div>
+          <div style={{ fontFamily: FONT_HEAD, fontWeight: 800, fontSize: 20 }}>{hitRate}</div>
           <div style={{ fontSize: 11, color: COLORS.muted, marginTop: 2 }}>7-day hit rate</div>
         </div>
       </div>

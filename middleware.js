@@ -12,7 +12,9 @@ export function middleware(request) {
   const { pathname } = request.nextUrl;
   const isAdminPage = pathname.startsWith("/admin");
   const isLikeAction = /^\/api\/tips\/[^/]+\/like$/.test(pathname) && request.method === "POST";
-  const isMutatingApi = pathname.startsWith("/api/tips") && request.method !== "GET" && !isLikeAction;
+  const isMutatingTipsApi = pathname.startsWith("/api/tips") && request.method !== "GET" && !isLikeAction;
+  const isMutatingSettingsApi = pathname.startsWith("/api/settings") && request.method !== "GET";
+  const isMutatingApi = isMutatingTipsApi || isMutatingSettingsApi;
 
   if (!isAdminPage && !isMutatingApi) {
     return NextResponse.next();
@@ -29,5 +31,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/api/tips/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/api/tips/:path*", "/api/settings"],
 };

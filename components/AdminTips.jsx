@@ -73,6 +73,68 @@ const inputStyle = {
   boxSizing: "border-box",
 };
 
+function SettingsPanel({ hitRate, onSave }) {
+  const [value, setValue] = useState(hitRate);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setValue(hitRate);
+  }, [hitRate]);
+
+  const save = async () => {
+    setSaving(true);
+    setSaved(false);
+    await onSave(value);
+    setSaving(false);
+    setSaved(true);
+  };
+
+  return (
+    <div
+      style={{
+        margin: "0 20px 16px",
+        background: COLORS.card,
+        border: `1px solid ${COLORS.line}`,
+        borderRadius: 16,
+        padding: 14,
+      }}
+    >
+      <Field label="7-day hit rate (shown on public page)">
+        <input
+          style={inputStyle}
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setSaved(false);
+          }}
+          placeholder="68%"
+        />
+      </Field>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <button
+          onClick={save}
+          disabled={saving || !value.trim()}
+          style={{
+            fontFamily: FONT_HEAD,
+            fontWeight: 700,
+            fontSize: 12.5,
+            padding: "7px 14px",
+            borderRadius: 9,
+            background: value.trim() ? COLORS.ink : COLORS.line,
+            color: value.trim() ? "#fff" : COLORS.muted,
+            border: "none",
+            cursor: value.trim() ? "pointer" : "not-allowed",
+          }}
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+        {saved && <span style={{ fontSize: 12, color: COLORS.teal }}>Saved</span>}
+      </div>
+    </div>
+  );
+}
+
 function TipForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial);
 
@@ -314,15 +376,31 @@ export default function AdminTips() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [creating, setCreating] = useState(false);
+  const [hitRate, setHitRate] = useState("");
 
   useEffect(() => {
     fetch("/api/tips")
       .then((res) => res.json())
       .then((data) => setTips(data))
       .finally(() => setLoading(false));
+
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => setHitRate(data.hitRate))
+      .catch(() => {});
   }, []);
 
   const editingTip = editingId ? tips.find((t) => t.id === editingId) : null;
+
+  const handleSaveHitRate = async (value) => {
+    const res = await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hitRate: value }),
+    });
+    const updated = await res.json();
+    setHitRate(updated.hitRate);
+  };
 
   const handleCreate = async (form) => {
     const res = await fetch("/api/tips", {
@@ -403,6 +481,8 @@ export default function AdminTips() {
           {tips.filter((t) => t.published).length} published · {tips.filter((t) => !t.published).length} drafts
         </p>
       </div>
+
+      {!loading && <SettingsPanel hitRate={hitRate} onSave={handleSaveHitRate} />}
 
       <div style={{ padding: "0 20px 16px" }}>
         {!creating && !editingId && (
