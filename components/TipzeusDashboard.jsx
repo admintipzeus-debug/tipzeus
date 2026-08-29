@@ -403,6 +403,8 @@ export default function TipzeusDashboard() {
         </p>
       </div>
 
+      <Banner />
+
       <div style={{ display: "flex", gap: 10, padding: "12px 20px 4px" }}>
         <div style={{ flex: 1, background: COLORS.coral, borderRadius: 16, padding: "12px 14px" }}>
           <div style={{ fontFamily: FONT_HEAD, fontWeight: 800, fontSize: 20, color: "#fff" }}>{tips.length}</div>
@@ -413,8 +415,6 @@ export default function TipzeusDashboard() {
           <div style={{ fontSize: 11, color: COLORS.muted, marginTop: 2 }}>7-day hit rate</div>
         </div>
       </div>
-
-      <Banner />
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 20px 12px" }}>
         <h2 style={{ fontFamily: FONT_HEAD, fontSize: 16, fontWeight: 700, margin: 0 }}>Today's fixtures</h2>
