@@ -279,9 +279,23 @@ function TipForm({ initial, onSave, onCancel }) {
   );
 }
 
-function TipRow({ tip, onEdit, onDelete, onTogglePublish }) {
+function TipRow({ tip, onEdit, onDelete, onTogglePublish, onMoveUp, onMoveDown, isFirst, isLast }) {
   const confBg = tip.confidence === "high" ? COLORS.tealSoft : COLORS.sunSoft;
   const confColor = tip.confidence === "high" ? "#00806E" : "#B8790F";
+
+  const moveButtonStyle = (disabled) => ({
+    fontFamily: FONT_HEAD,
+    fontWeight: 700,
+    fontSize: 12,
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    background: COLORS.bg,
+    color: disabled ? COLORS.line : COLORS.ink,
+    border: `1px solid ${COLORS.line}`,
+    cursor: disabled ? "not-allowed" : "pointer",
+    lineHeight: 1,
+  });
 
   return (
     <div
@@ -317,6 +331,12 @@ function TipRow({ tip, onEdit, onDelete, onTogglePublish }) {
         {tip.kickoff} · {tip.pick} · {tip.odds} · {tip.units}
       </div>
       <div style={{ display: "flex", gap: 6 }}>
+        <button onClick={onMoveUp} disabled={isFirst} style={moveButtonStyle(isFirst)} title="Move up">
+          ↑
+        </button>
+        <button onClick={onMoveDown} disabled={isLast} style={moveButtonStyle(isLast)} title="Move down">
+          ↓
+        </button>
         <button
           onClick={onTogglePublish}
           style={{
@@ -440,6 +460,16 @@ export default function AdminTips() {
     setTips(tips.map((t) => (t.id === id ? updated : t)));
   };
 
+  const moveTip = async (id, direction) => {
+    const res = await fetch(`/api/tips/${id}/move`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ direction }),
+    });
+    const reordered = await res.json();
+    setTips(reordered);
+  };
+
   return (
     <div
       style={{
@@ -518,13 +548,17 @@ export default function AdminTips() {
 
       {!creating &&
         !editingId &&
-        tips.map((tip) => (
+        tips.map((tip, index) => (
           <TipRow
             key={tip.id}
             tip={tip}
             onEdit={() => setEditingId(tip.id)}
             onDelete={() => handleDelete(tip.id)}
             onTogglePublish={() => togglePublish(tip.id)}
+            onMoveUp={() => moveTip(tip.id, "up")}
+            onMoveDown={() => moveTip(tip.id, "down")}
+            isFirst={index === 0}
+            isLast={index === tips.length - 1}
           />
         ))}
 
