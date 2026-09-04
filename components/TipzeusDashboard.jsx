@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 const FONT_HEAD = "'Baloo 2', sans-serif";
@@ -311,6 +311,87 @@ function TipCard({ tip }) {
   );
 }
 
+function HeaderMenu() {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={menuRef} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen((prev) => !prev)}
+        aria-label="Menu"
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          background: COLORS.sunSoft,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#B8790F",
+          border: "2px solid #fff",
+          boxShadow: `0 0 0 2px ${COLORS.sunSoft}`,
+          cursor: "pointer",
+          padding: 0,
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="4" y1="7" x2="20" y2="7" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="17" x2="20" y2="17" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: 44,
+            right: 0,
+            background: COLORS.card,
+            border: `1px solid ${COLORS.line}`,
+            borderRadius: 12,
+            boxShadow: "0 8px 24px -8px rgba(46,36,22,0.35)",
+            overflow: "hidden",
+            minWidth: 140,
+            zIndex: 10,
+          }}
+        >
+          <button
+            onClick={() => setOpen(false)}
+            style={{
+              display: "block",
+              width: "100%",
+              textAlign: "left",
+              padding: "11px 14px",
+              background: "transparent",
+              border: "none",
+              fontFamily: FONT_HEAD,
+              fontWeight: 600,
+              fontSize: 13.5,
+              color: COLORS.ink,
+              cursor: "pointer",
+            }}
+          >
+            Contact Us
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function formatTime(date) {
   let hours = date.getHours();
   const minutes = String(date.getMinutes()).padStart(2, "0");
@@ -379,25 +460,7 @@ export default function TipzeusDashboard() {
           </div>
           <div style={{ fontFamily: FONT_HEAD, fontWeight: 800, fontSize: 17, letterSpacing: "-0.01em" }}>Tipzeus</div>
         </div>
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: COLORS.sunSoft,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#B8790F",
-            fontFamily: FONT_HEAD,
-            fontWeight: 700,
-            fontSize: 13,
-            border: "2px solid #fff",
-            boxShadow: `0 0 0 2px ${COLORS.sunSoft}`,
-          }}
-        >
-          JD
-        </div>
+        <HeaderMenu />
       </div>
 
       <div style={{ padding: "2px 20px 16px" }}>
