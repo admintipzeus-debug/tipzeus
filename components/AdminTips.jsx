@@ -216,6 +216,16 @@ function SettingsPanel({ hitRate, leagues, onSaveHitRate, onAddLeague, onRemoveL
 function TipForm({ initial, leagues, onSave, onCancel }) {
   const [form, setForm] = useState(initial);
 
+  // If the tip's stored league (or the default for a new tip) isn't in the
+  // current leagues list, the <select> would visually show a different
+  // option than what's actually held in state, and that stale value would
+  // get silently saved. Keep them in sync.
+  useEffect(() => {
+    if (leagues.length > 0 && !leagues.includes(form.league)) {
+      setForm((f) => ({ ...f, league: leagues[0] }));
+    }
+  }, [leagues]);
+
   const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
   const updateLikes = (e) => setForm({ ...form, likes: e.target.value === "" ? 0 : Math.max(0, parseInt(e.target.value, 10) || 0) });
 
