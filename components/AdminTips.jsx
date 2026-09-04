@@ -445,6 +445,10 @@ export default function AdminTips() {
   };
 
   const handleDelete = async (id) => {
+    const tip = tips.find((t) => t.id === id);
+    const label = tip ? `${tip.home} vs ${tip.away}` : "this tip";
+    if (!window.confirm(`Delete "${label}"? This can't be undone.`)) return;
+
     await fetch(`/api/tips/${id}`, { method: "DELETE" });
     setTips(tips.filter((t) => t.id !== id));
   };
