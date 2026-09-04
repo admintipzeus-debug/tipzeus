@@ -153,6 +153,15 @@ function TipForm({ initial, onSave, onCancel }) {
         padding: 16,
       }}
     >
+      <Field label="League">
+        <select style={inputStyle} value={form.league} onChange={update("league")}>
+          <option value="Premier League">Premier League</option>
+          <option value="La Liga">La Liga</option>
+          <option value="Bundesliga">Bundesliga</option>
+          <option value="Serie A">Serie A</option>
+        </select>
+      </Field>
+
       <div style={{ display: "flex", gap: 10 }}>
         <div style={{ flex: 1 }}>
           <Field label="Home team">
