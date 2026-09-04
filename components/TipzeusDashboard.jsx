@@ -322,7 +322,7 @@ function formatTime(date) {
 export default function TipzeusDashboard() {
   const [tips, setTips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [updatedAt, setUpdatedAt] = useState(null);
+  const [lastUpdatedTip, setLastUpdatedTip] = useState(null);
   const [hitRate, setHitRate] = useState("");
 
   useEffect(() => {
@@ -332,10 +332,10 @@ export default function TipzeusDashboard() {
         const published = data.filter((tip) => tip.published);
         setTips(published);
         const latest = published.reduce(
-          (max, tip) => (!max || new Date(tip.updatedAt) > max ? new Date(tip.updatedAt) : max),
+          (max, tip) => (!max || new Date(tip.updatedAt) > new Date(max.updatedAt) ? tip : max),
           null
         );
-        setUpdatedAt(latest);
+        setLastUpdatedTip(latest);
       })
       .finally(() => setLoading(false));
 
@@ -405,7 +405,9 @@ export default function TipzeusDashboard() {
           Today's tips
         </h1>
         <p style={{ margin: 0, color: COLORS.muted, fontSize: 13.5 }}>
-          Premier League{updatedAt ? ` — updated ${formatTime(updatedAt)}` : ""}
+          {lastUpdatedTip
+            ? `${lastUpdatedTip.league} — updated ${formatTime(new Date(lastUpdatedTip.updatedAt))}`
+            : ""}
         </p>
       </div>
 
