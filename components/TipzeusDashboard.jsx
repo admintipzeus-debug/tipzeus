@@ -368,11 +368,13 @@ function HeaderMenu() {
             zIndex: 10,
           }}
         >
-          <button
+          <a
+            href="mailto:admintipzeus@gmail.com"
             onClick={() => setOpen(false)}
             style={{
               display: "block",
               width: "100%",
+              boxSizing: "border-box",
               textAlign: "left",
               padding: "11px 14px",
               background: "transparent",
@@ -381,11 +383,12 @@ function HeaderMenu() {
               fontWeight: 600,
               fontSize: 13.5,
               color: COLORS.ink,
+              textDecoration: "none",
               cursor: "pointer",
             }}
           >
             Contact Us
-          </button>
+          </a>
         </div>
       )}
     </div>

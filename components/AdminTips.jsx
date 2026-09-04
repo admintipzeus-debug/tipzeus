@@ -73,10 +73,11 @@ const inputStyle = {
   boxSizing: "border-box",
 };
 
-function SettingsPanel({ hitRate, onSave }) {
+function SettingsPanel({ hitRate, leagues, onSaveHitRate, onAddLeague, onRemoveLeague }) {
   const [value, setValue] = useState(hitRate);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [newLeague, setNewLeague] = useState("");
 
   useEffect(() => {
     setValue(hitRate);
@@ -85,9 +86,16 @@ function SettingsPanel({ hitRate, onSave }) {
   const save = async () => {
     setSaving(true);
     setSaved(false);
-    await onSave(value);
+    await onSaveHitRate(value);
     setSaving(false);
     setSaved(true);
+  };
+
+  const addLeague = () => {
+    const trimmed = newLeague.trim();
+    if (!trimmed || leagues.includes(trimmed)) return;
+    onAddLeague(trimmed);
+    setNewLeague("");
   };
 
   return (
@@ -111,7 +119,7 @@ function SettingsPanel({ hitRate, onSave }) {
           placeholder="68%"
         />
       </Field>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
         <button
           onClick={save}
           disabled={saving || !value.trim()}
@@ -131,11 +139,81 @@ function SettingsPanel({ hitRate, onSave }) {
         </button>
         {saved && <span style={{ fontSize: 12, color: COLORS.teal }}>Saved</span>}
       </div>
+
+      <Field label="Leagues (available in the tip form)">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+          {leagues.map((league) => (
+            <span
+              key={league}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                fontFamily: FONT_BODY,
+                fontSize: 12.5,
+                padding: "5px 6px 5px 10px",
+                borderRadius: 20,
+                background: COLORS.bg,
+                border: `1px solid ${COLORS.line}`,
+                color: COLORS.ink,
+              }}
+            >
+              {league}
+              <button
+                onClick={() => onRemoveLeague(league)}
+                title={`Remove ${league}`}
+                disabled={leagues.length <= 1}
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  border: "none",
+                  background: COLORS.line,
+                  color: COLORS.muted,
+                  fontSize: 10,
+                  lineHeight: 1,
+                  cursor: leagues.length <= 1 ? "not-allowed" : "pointer",
+                  padding: 0,
+                }}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            style={inputStyle}
+            value={newLeague}
+            onChange={(e) => setNewLeague(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addLeague()}
+            placeholder="e.g. Ligue 1"
+          />
+          <button
+            onClick={addLeague}
+            disabled={!newLeague.trim()}
+            style={{
+              fontFamily: FONT_HEAD,
+              fontWeight: 700,
+              fontSize: 12.5,
+              padding: "0 16px",
+              borderRadius: 9,
+              background: newLeague.trim() ? COLORS.teal : COLORS.line,
+              color: newLeague.trim() ? "#fff" : COLORS.muted,
+              border: "none",
+              cursor: newLeague.trim() ? "pointer" : "not-allowed",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Add
+          </button>
+        </div>
+      </Field>
     </div>
   );
 }
 
-function TipForm({ initial, onSave, onCancel }) {
+function TipForm({ initial, leagues, onSave, onCancel }) {
   const [form, setForm] = useState(initial);
 
   const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
@@ -155,10 +233,11 @@ function TipForm({ initial, onSave, onCancel }) {
     >
       <Field label="League">
         <select style={inputStyle} value={form.league} onChange={update("league")}>
-          <option value="Premier League">Premier League</option>
-          <option value="La Liga">La Liga</option>
-          <option value="Bundesliga">Bundesliga</option>
-          <option value="Serie A">Serie A</option>
+          {leagues.map((league) => (
+            <option key={league} value={league}>
+              {league}
+            </option>
+          ))}
         </select>
       </Field>
 
@@ -406,6 +485,7 @@ export default function AdminTips() {
   const [editingId, setEditingId] = useState(null);
   const [creating, setCreating] = useState(false);
   const [hitRate, setHitRate] = useState("");
+  const [leagues, setLeagues] = useState(["Premier League"]);
 
   useEffect(() => {
     fetch("/api/tips")
@@ -415,7 +495,10 @@ export default function AdminTips() {
 
     fetch("/api/settings")
       .then((res) => res.json())
-      .then((data) => setHitRate(data.hitRate))
+      .then((data) => {
+        setHitRate(data.hitRate);
+        setLeagues(data.leagues);
+      })
       .catch(() => {});
   }, []);
 
@@ -429,6 +512,26 @@ export default function AdminTips() {
     });
     const updated = await res.json();
     setHitRate(updated.hitRate);
+  };
+
+  const handleAddLeague = async (league) => {
+    const res = await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leagues: [...leagues, league] }),
+    });
+    const updated = await res.json();
+    setLeagues(updated.leagues);
+  };
+
+  const handleRemoveLeague = async (league) => {
+    const res = await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leagues: leagues.filter((l) => l !== league) }),
+    });
+    const updated = await res.json();
+    setLeagues(updated.leagues);
   };
 
   const handleCreate = async (form) => {
@@ -525,7 +628,15 @@ export default function AdminTips() {
         </p>
       </div>
 
-      {!loading && <SettingsPanel hitRate={hitRate} onSave={handleSaveHitRate} />}
+      {!loading && (
+        <SettingsPanel
+          hitRate={hitRate}
+          leagues={leagues}
+          onSaveHitRate={handleSaveHitRate}
+          onAddLeague={handleAddLeague}
+          onRemoveLeague={handleRemoveLeague}
+        />
+      )}
 
       <div style={{ padding: "0 20px 16px" }}>
         {!creating && !editingId && (
@@ -549,11 +660,14 @@ export default function AdminTips() {
         )}
       </div>
 
-      {creating && <TipForm initial={EMPTY_TIP} onSave={handleCreate} onCancel={() => setCreating(false)} />}
+      {creating && (
+        <TipForm initial={EMPTY_TIP} leagues={leagues} onSave={handleCreate} onCancel={() => setCreating(false)} />
+      )}
 
       {editingTip && (
         <TipForm
           initial={editingTip}
+          leagues={leagues}
           onSave={handleUpdate}
           onCancel={() => setEditingId(null)}
         />
